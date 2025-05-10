@@ -11,6 +11,7 @@ tokens = ('TITULO',
 section = 0
 def t_TITULO(t):
     r'\#[a-zA-Z].*'
+    print('hi')
     global section
     if section == 0:
         return t
@@ -27,25 +28,26 @@ def t_INSTRUCCIONES(t):
     section += 1
     return t
 
+t_MEDICIONES = r'\d+[g|l|ml|mg]'
+
 def t_NUMERO(t):
     r'\d+ '
     t.value = int(t.value)
     return t
 
-t_MEDICIONES = r'\d+[g|l|ml] '
-
+def t_INSTRUCCION(x):
+    r'[a-zA-Z].*'
+    global section
+    if section == 2:
+        return x
 
 def t_INGREDIENTE(t):
     r'[a-zA-Z].*'
     global section
     if section == 1:
         return t
-    
-def t_INSTRUCCION(t):
-    r'[a-zA-Z].*'
-    global section
-    if section == 2:
-        return t
+    else:
+        t_INSTRUCCION(t)
 
 t_ignore = ' \t\n'
 
@@ -63,10 +65,10 @@ INGREDIENTES
 INSTRUCCIONES
 Cortar jamon
 Cocinar huevo y jamon
-
 '''
 
 lexer.input(data)
+
 
 while True:
     tok = lexer.token()
