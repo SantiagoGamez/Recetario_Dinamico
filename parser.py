@@ -1,7 +1,6 @@
 import ply.lex as lex
 import ply.yacc as yacc
-from compiler.py import tokens, lexer
-tokens = ('TITULO', 'INGREDIENTES', 'MEDICIONES', 'NUMERO', 'INGREDIENTE', 'INSTRUCCIONES', 'INSTRUCCION')
+from compiler import tokens, lexer
 
 lexer = lex.lex()
 def p_receta(p):
