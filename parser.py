@@ -31,4 +31,10 @@ def p_lista_instrucciones(p):
 def p_error(p):
     print(f"Error de sintaxis en '{p.value}'")
 
+def parse(data):
+    global section
+    from compiler import section
+    section = 0
+    return parser.parse(data, lexer=lexer)
+
 parser = yacc.yacc()
