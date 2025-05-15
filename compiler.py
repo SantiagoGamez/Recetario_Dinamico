@@ -35,19 +35,15 @@ def t_NUMERO(t):
     t.value = int(t.value)
     return t
 
+def t_INGREDIENTE(t):
+    r'/[a-zA-Z]+(\s+[a-zA-Z]+)*\s*-\s*\d+ [a-zA-Z]*'
+    return t
+
 def t_INSTRUCCION(x):
     r'[a-zA-Z].*'
-    global section
-    if section == 2:
-        return x
+    return x
 
-def t_INGREDIENTE(t):
-    r'[a-zA-Z].*'
-    global section
-    if section == 1:
-        return t
-    else:
-        t_INSTRUCCION(t)
+
 
 t_ignore = ' \t\n'
 
@@ -60,8 +56,8 @@ lexer = lex.lex()
 data = '''
 #Huevo con Jamon
 INGREDIENTES
-1 huevo
-200mg de jamon
+Huevo - 1 huevo
+Jamon - 200 mg
 INSTRUCCIONES
 Cortar jamon
 Cocinar huevo y jamon
