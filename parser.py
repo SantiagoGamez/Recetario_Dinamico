@@ -1,5 +1,5 @@
 import ply.yacc as yacc
-from compiler import lexer
+from compiler import tokens, lexer
 
 def p_receta(p):
     '''receta : titulo ingredientes instrucciones'''
