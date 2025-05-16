@@ -44,7 +44,6 @@ def t_INSTRUCCION(t):
     return t
 
 
-
 t_ignore = ' \t\n'
 
 def t_error(t):
