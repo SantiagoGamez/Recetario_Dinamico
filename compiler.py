@@ -36,13 +36,12 @@ def t_NUMERO(t):
     return t
 
 def t_INGREDIENTE(t):
-    r'/[a-zA-Z]+(\s+[a-zA-Z]+)*\s*-\s*\d+ [a-zA-Z]*'
+    r'[a-zA-Z]+(\s+[a-zA-Z]+)*\s*-\s*\d+\s*[a-zA-Z]*'
     return t
 
-def t_INSTRUCCION(x):
+def t_INSTRUCCION(t):
     r'[a-zA-Z].*'
-    return x
-
+    return t
 
 
 t_ignore = ' \t\n'
