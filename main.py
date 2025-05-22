@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import shutil
 import webbrowser
+import atexit
+import tempfile
 
 class RecipeConverterGUI:
     def __init__(self, root):
@@ -21,6 +23,8 @@ class RecipeConverterGUI:
         self.output_file = ""
         
         self.setup_ui()
+        
+        atexit.register(self.cleanup_file)
     
     def setup_ui(self):
         # Main frame
@@ -88,7 +92,6 @@ class RecipeConverterGUI:
                                     command=self.open_in_browser, state="disabled")
         self.open_button.pack(side=tk.LEFT)
         
-        # Initial status
         self.log_message("Bienvenido al Convertidor de Recetas")
         self.log_message("Seleccione un archivo de texto para comenzar")
     
@@ -139,7 +142,8 @@ class RecipeConverterGUI:
             
             # Generate output file name
             base_name = os.path.splitext(os.path.basename(file_path))[0]
-            self.output_file = f"{base_name}.html"
+            temp_dir = tempfile.gettempdir()
+            self.output_file = os.path.join(temp_dir, f"{base_name}.html")
             
             # Process with lexer
             self.log_message("Procesando contenido...")
@@ -165,7 +169,6 @@ class RecipeConverterGUI:
                 self.log_message("✅ Conversión completada exitosamente!")
                 self.log_message(f"Archivo generado: {self.output_file}")
                 
-                # Enable download buttons
                 self.download_button.config(state="normal")
                 self.open_button.config(state="normal")
                 
@@ -179,7 +182,6 @@ class RecipeConverterGUI:
             messagebox.showerror("Error", f"Error durante la conversión:\n{str(e)}")
         
         finally:
-            # Stop progress bar and re-enable convert button
             self.progress.stop()
             self.convert_button.config(state="normal")
     
@@ -225,7 +227,7 @@ class RecipeConverterGUI:
         except Exception as e:
             raise Exception(f"Error al leer el archivo: {e}")
     
-    # Lexer tokens and functions (copied from original code)
+    # Lexer tokens and functions
     tokens = ('TITULO',
               'INGREDIENTES',
               'MEDICIONES',
@@ -440,7 +442,7 @@ class RecipeConverterGUI:
             <ul>"""
         
         for ingrediente in ingredientes:
-            # Enhanced ingredient parsing with color highlighting
+            # Color highlighting
             highlighted_ingredient = self.highlight_ingredient(ingrediente)
             html_content += f"\n                <li>{highlighted_ingredient}</li>"
         
@@ -453,7 +455,7 @@ class RecipeConverterGUI:
             <ol>"""
         
         for i, instruccion in enumerate(instrucciones, 1):
-            # Enhanced instruction parsing with color highlighting
+            # Color highlighting
             highlighted_instruction = self.highlight_instruction(instruccion)
             html_content += f"\n                <li>{highlighted_instruction}</li>"
         
@@ -468,7 +470,7 @@ class RecipeConverterGUI:
 </body>
 </html>"""
         
-        # Write HTML file
+        # Make HTML file
         try:
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(html_content)
@@ -481,7 +483,6 @@ class RecipeConverterGUI:
         """Add color highlighting to ingredient names and quantities"""
         import re
         
-        # Pattern to match ingredient format: "ingredient name - quantity unit"
         pattern = r'([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)\s*-\s*(\d+)\s*([a-zA-Z]*)'
         match = re.match(pattern, ingredient_text)
         
@@ -499,7 +500,7 @@ class RecipeConverterGUI:
         """Add color highlighting to action verbs and measurements in instructions"""
         import re
         
-        # Common cooking verbs in Spanish
+        # Common cooking verbs
         action_verbs = [
             'mezclar', 'batir', 'cocinar', 'hornear', 'freír', 'hervir', 'saltear',
             'picar', 'cortar', 'rallar', 'pelar', 'lavar', 'añadir', 'agregar',
@@ -516,7 +517,7 @@ class RecipeConverterGUI:
         
         highlighted_text = instruction_text
         
-        # Highlight action verbs
+        # Highlight action cooking verbs
         for verb in action_verbs:
             pattern = r'\b(' + verb + r')\b'
             highlighted_text = re.sub(pattern, r'<span class="action-verb">\1</span>', 
@@ -528,9 +529,17 @@ class RecipeConverterGUI:
                                     highlighted_text, flags=re.IGNORECASE)
         
         return highlighted_text
+    
+    def cleanup_file(self):
+        if self.output_file and os.path.exists(self.output_file):
+            try:
+                os.remove(self.output_file)
+                print(f"Archivo temporal eliminado: {self.output_file}")
+            except Exception:
+                pass
 
 def main():
-    # Check if PLY is available
+    # Run the application
     try:
         import ply.lex as lex
     except ImportError:
@@ -538,15 +547,13 @@ def main():
         print("Instale PLY ejecutando: pip install ply")
         sys.exit(1)
     
-    # Create and run the GUI
     root = tk.Tk()
     app = RecipeConverterGUI(root)
     
-    # Set window icon (optional)
     try:
-        root.iconbitmap('recipe_icon.ico')  # Add an icon file if you have one
+        root.iconbitmap('recipe_icon.ico') 
     except:
-        pass  # Ignore if icon file doesn't exist
+        pass
     
     root.mainloop()
 
