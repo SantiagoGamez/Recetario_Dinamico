@@ -12,15 +12,150 @@ class RecipeConverterGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Convertidor de Recetas - TXT a HTML")
-        self.root.geometry("700x500")
+        self.root.geometry("700x550")
         self.root.resizable(True, True)
         
-        # Center the window on startup
         self.center_window()
         
-        # Variables
         self.selected_file = tk.StringVar()
         self.output_file = ""
+        
+        # Ingredient categories
+        self.ingredient_categories = {
+            'proteinas': {
+                'ingredients': [
+                    # Meats
+                    'pollo', 'pavo', 'cerdo', 'ternera', 'res', 'carne', 'buey', 'cordero',
+                    'conejo', 'venado', 'pato', 'ganso', 'codorniz', 'jamón', 'tocino',
+                    'chorizo', 'salchicha', 'mortadela', 'salami', 'prosciutto',
+                    # Fish & Seafood
+                    'pescado', 'salmón', 'atún', 'bacalao', 'merluza', 'trucha', 'lubina',
+                    'dorada', 'sardina', 'anchoa', 'camarón', 'langostino', 'gamba',
+                    'cangrejo', 'langosta', 'pulpo', 'calamar', 'mejillón', 'almeja',
+                    'ostra', 'vieira', 'sepia',
+                    # Dairy & Eggs
+                    'huevo', 'huevos', 'clara', 'yema', 'queso', 'mozzarella', 'parmesano',
+                    'cheddar', 'gouda', 'brie', 'camembert', 'roquefort', 'yogur', 'leche',
+                    'nata', 'crema agria', 'ricotta', 'mascarpone', 'requesón',
+                    # Plant proteins & Legumes
+                    'tofu', 'tempeh', 'seitán', 'lentejas', 'garbanzos', 'frijoles', 'habas',
+                    'judías', 'alubias', 'soja', 'edamame', 'guisantes', 'chícharos',
+                    # Nuts & Seeds
+                    'almendras', 'nueces', 'pistachos', 'cacahuates', 'maní', 'avellanas',
+                    'piñones', 'castañas', 'pecanas', 'anacardos', 'semillas de girasol',
+                    'semillas de calabaza', 'chía', 'linaza', 'sésamo', 'tahini'
+                ],
+                'color': '#e74c3c',
+                'bg_color': 'rgba(231, 76, 60, 0.1)',
+                'border_color': 'rgba(231, 76, 60, 0.3)'
+            },
+            'carbohidratos': {
+                'ingredients': [
+                    # Grains & Cereals
+                    'arroz', 'pasta', 'fideos', 'macarrones', 'espagueti', 'linguini',
+                    'penne', 'fusilli', 'lasaña', 'ñoquis', 'pan', 'baguette',
+                    'chapata', 'pita', 'tortilla', 'wrap', 'harina', 'harina integral',
+                    'avena', 'quinoa', 'cebada', 'trigo', 'bulgur', 'cuscús', 'maíz',
+                    'polenta', 'arroz integral', 'arroz basmati', 'arroz jazmín', 'tortillas',
+                    # Starchy vegetables
+                    'papa', 'patata', 'batata', 'boniato', 'ñame', 'yuca', 'mandioca',
+                    'plátano', 'plátano macho', 'calabaza', 'zapallo',
+                    # Sugars & Sweeteners
+                    'azúcar', 'azúcar moreno', 'azúcar glass', 'miel', 'jarabe de arce',
+                    'jarabe', 'melaza', 'stevia', 'agave', 'panela', 'piloncillo',
+                    # Fruits (high carb)
+                    'dátiles', 'higos', 'pasas', 'uvas pasas', 'banana', 'mango'
+                ],
+                'color': '#f39c12',
+                'bg_color': 'rgba(243, 156, 18, 0.1)',
+                'border_color': 'rgba(243, 156, 18, 0.3)'
+            },
+            'grasas': {
+                'ingredients': [
+                    # Oils
+                    'aceite', 'aceite de oliva', 'aceite de girasol', 'aceite de canola',
+                    'aceite de coco', 'aceite de sésamo', 'aceite de aguacate',
+                    'aceite de nuez', 'aceite vegetal',
+                    # Butter & Spreads
+                    'mantequilla', 'margarina', 'manteca', 'manteca de cerdo',
+                    'grasa', 'mantecilla', 'ghee',
+                    # Creams
+                    'crema', 'nata', 'crema de leche', 'crema batida', 'crema fresca',
+                    'crema agria', 'leche de coco',
+                    # Fatty fruits & nuts
+                    'aguacate', 'palta', 'coco', 'coco rallado', 'leche de coco',
+                    'aceitunas', 'olivas'
+                ],
+                'color': '#9b59b6',
+                'bg_color': 'rgba(155, 89, 182, 0.1)',
+                'border_color': 'rgba(155, 89, 182, 0.3)'
+            },
+            'fibra': {
+                'ingredients': [
+                    # Leafy greens
+                    'lechuga', 'espinaca', 'acelga', 'rúcula', 'berros', 'canónigo',
+                    'kale', 'col rizada', 'repollo', 'col', 'col lombarda',
+                    # Cruciferous vegetables
+                    'brócoli', 'coliflor', 'romanesco', 'coles de bruselas',
+                    # Root vegetables
+                    'zanahoria', 'remolacha', 'betabel', 'nabo', 'rábano', 'daikon',
+                    # Other vegetables
+                    'apio', 'cebolla', 'cebolleta', 'puerro', 'chalota', 'echalote',
+                    'ajo', 'jengibre', 'pimiento', 'chile', 'jalapeño', 'habanero',
+                    'tomate', 'tomate cherry', 'pepino', 'calabacín', 'zucchini',
+                    'berenjena', 'okra', 'espárragos', 'alcachofa', 'hinojo',
+                    # Mushrooms
+                    'champiñón', 'setas', 'hongos', 'portobello', 'shiitake',
+                    'enoki', 'cremini', 'champiñones',
+                    # Herbs (fresh)
+                    'perejil', 'cilantro', 'albahaca', 'menta', 'hierbabuena',
+                    'eneldo', 'cebollín', 'cebollino', 'estragón',
+                    # Fruits
+                    'manzana', 'pera', 'naranja', 'limón', 'lima', 'pomelo',
+                    'mandarina', 'uva', 'kiwi', 'piña', 'ananá', 'papaya',
+                    'fresa', 'mora', 'arándano', 'frambuesa', 'grosella',
+                    'cereza', 'ciruela', 'durazno', 'melocotón', 'albaricoque',
+                    'chabacano', 'sandía', 'melón', 'cantaloupe'
+                ],
+                'color': '#27ae60',
+                'bg_color': 'rgba(39, 174, 96, 0.1)',
+                'border_color': 'rgba(39, 174, 96, 0.3)'
+            },
+            'condimentos': {
+                'ingredients': [
+                    # Salt & Basic seasonings
+                    'sal', 'sal marina', 'sal kosher', 'sal de ajo', 'sal de cebolla',
+                    'pimienta', 'pimienta negra', 'pimienta blanca', 'pimienta rosa',
+                    'pimienta de cayena', 'pimentón', 'paprika', 'páprika ahumada',
+                    # Dried herbs
+                    'orégano', 'tomillo', 'romero', 'salvia', 'laurel', 'hoja de laurel',
+                    'mejorana', 'hierbas provenzales', 'hierbas italianas',
+                    # Spices
+                    'comino', 'cúrcuma', 'curry', 'garam masala', 'canela', 'clavo',
+                    'nuez moscada', 'cardamomo', 'anís', 'anís estrellado', 'hinojo',
+                    'coriandro', 'semillas de mostaza', 'mostaza en polvo',
+                    'azafrán', 'pimentón dulce', 'chile en polvo', 'chipotle',
+                    'achiote', 'bijol', 'sumac', 'za\'atar',
+                    # Garlic & Onion preparations
+                    'ajo en polvo', 'cebolla en polvo', 'granulado de ajo',
+                    'granulado de cebolla',
+                    # Vinegars
+                    'vinagre', 'vinagre de vino', 'vinagre balsámico', 'vinagre de manzana',
+                    'vinagre de jerez', 'vinagre de arroz', 'vinagre blanco',
+                    # Sauces & Condiments
+                    'salsa de soja', 'salsa inglesa', 'worcestershire', 'tabasco',
+                    'salsa picante', 'mostaza', 'mostaza dijon', 'ketchup', 'mayonesa',
+                    'sriracha', 'harissa', 'chimichurri', 'pesto',
+                    # Flavor enhancers
+                    'glutamato monosódico', 'levadura nutricional', 'caldo concentrado',
+                    'concentrado de tomate', 'pasta de tomate', 'extracto de vainilla',
+                    'esencia de vainilla', 'agua de rosas', 'agua de azahar'
+                ],
+                'color': '#e67e22',
+                'bg_color': 'rgba(230, 126, 34, 0.1)',
+                'border_color': 'rgba(230, 126, 34, 0.3)'
+            }
+        }
         
         self.setup_ui()
         
@@ -31,17 +166,14 @@ class RecipeConverterGUI:
         main_frame = ttk.Frame(self.root, padding="20")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Configure grid weights
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         main_frame.columnconfigure(1, weight=1)
         
-        # Title
         title_label = ttk.Label(main_frame, text="Convertidor de Recetas", 
                                font=("Arial", 18, "bold"))
         title_label.grid(row=0, column=0, columnspan=3, pady=(0, 20))
         
-        # File selection section
         file_frame = ttk.LabelFrame(main_frame, text="Seleccionar Archivo", padding="10")
         file_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 20))
         file_frame.columnconfigure(1, weight=1)
@@ -54,7 +186,6 @@ class RecipeConverterGUI:
         self.browse_button = ttk.Button(file_frame, text="Examinar...", command=self.browse_file)
         self.browse_button.grid(row=0, column=2)
         
-        # Convert section
         convert_frame = ttk.LabelFrame(main_frame, text="Conversión", padding="10")
         convert_frame.grid(row=2, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 20))
         
@@ -62,22 +193,18 @@ class RecipeConverterGUI:
                                        command=self.convert_file, state="disabled")
         self.convert_button.pack(pady=10)
         
-        # Progress bar
         self.progress = ttk.Progressbar(convert_frame, mode='indeterminate')
         self.progress.pack(fill=tk.X, pady=(0, 10))
         
-        # Status section
         status_frame = ttk.LabelFrame(main_frame, text="Estado", padding="10")
         status_frame.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 20))
         
         self.status_text = tk.Text(status_frame, height=6, wrap=tk.WORD)
         self.status_text.pack(fill=tk.BOTH, expand=True)
         
-        # Add scrollbar to status text
         scrollbar = ttk.Scrollbar(status_frame, orient=tk.VERTICAL, command=self.status_text.yview)
         self.status_text.configure(yscrollcommand=scrollbar.set)
         
-        # Download section
         download_frame = ttk.LabelFrame(main_frame, text="Descargar", padding="10")
         download_frame.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E))
         
@@ -126,7 +253,6 @@ class RecipeConverterGUI:
             return
         
         try:
-            # Start progress bar
             self.progress.start()
             self.convert_button.config(state="disabled")
             self.download_button.config(state="disabled")
@@ -134,26 +260,21 @@ class RecipeConverterGUI:
             
             self.log_message("Iniciando conversión...")
             
-            # Read the recipe file
             file_path = self.selected_file.get()
             self.log_message(f"Leyendo archivo: {os.path.basename(file_path)}")
             
             data = self.leer_receta(file_path)
             
-            # Generate output file name
             base_name = os.path.splitext(os.path.basename(file_path))[0]
             temp_dir = tempfile.gettempdir()
             self.output_file = os.path.join(temp_dir, f"{base_name}.html")
             
-            # Process with lexer
             self.log_message("Procesando contenido...")
             section = 0  # Reset section counter
             
-            # Create lexer instance
             lexer = lex.lex(module=self)
             lexer.input(data)
             
-            # Collect all tokens
             tokens_list = []
             while True:
                 tok = lexer.token()
@@ -163,7 +284,6 @@ class RecipeConverterGUI:
             
             self.log_message(f"Tokens procesados: {len(tokens_list)}")
             
-            # Convert to HTML
             self.log_message("Generando archivo HTML...")
             if self.tokens_to_html(tokens_list, self.output_file):
                 self.log_message("✅ Conversión completada exitosamente!")
@@ -262,7 +382,7 @@ class RecipeConverterGUI:
         return t
     
     def t_INGREDIENTE(self, t):
-        r'[a-zA-Z]+(\s+[a-zA-Z]+)*\s*-\s*\d+\s*[a-zA-Z]*'
+        r'[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*\s*-\s*\d+\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]*'
         return t
     
     def t_INSTRUCCION(self, t):
@@ -275,8 +395,21 @@ class RecipeConverterGUI:
         self.log_message(f"Caracter ilegal: '{t.value[0]}'")
         t.lexer.skip(1)
     
+    def get_ingredient_category(self, ingredient_name):
+        """Determine the category of an ingredient using word splitting"""
+        ingredient_lower = ingredient_name.lower().strip()
+        ingredient_words = ingredient_lower.split()
+        
+        for category, data in self.ingredient_categories.items():
+            for ingredient in data['ingredients']:
+                if ingredient in ingredient_words:
+                    return category
+                if ingredient == ingredient_lower:
+                    return category
+        
+        return None  # Default if no category matches
+    
     def tokens_to_html(self, tokens_list, output_file):
-        # Parse tokens into structured data
         titulo = ""
         ingredientes = []
         instrucciones = []
@@ -285,7 +418,7 @@ class RecipeConverterGUI:
         
         for token in tokens_list:
             if token.type == 'TITULO':
-                titulo = token.value[1:].strip()  # Remove the # symbol
+                titulo = token.value[1:].strip()
             elif token.type == 'INGREDIENTES':
                 current_section = 'ingredientes'
             elif token.type == 'INSTRUCCIONES':
@@ -334,15 +467,53 @@ class RecipeConverterGUI:
             margin-bottom: 20px;
             font-size: 1.8em;
             display: flex;
-            align-items: center;
+            align-items: center;    
             gap: 10px;
         }}
+        .category-legend {{
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #dee2e6;
+        }}
+        .category-legend h3 {{
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 1.2em;
+        }}
+        .legend-items {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }}
+        .legend-item {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #dee2e6;
+        }}
+        .legend-color {{
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }}
+        .proteinas-color {{ background-color: rgba(231, 76, 60, 0.3); border-color: #e74c3c; }}
+        .carbohidratos-color {{ background-color: rgba(243, 156, 18, 0.3); border-color: #f39c12; }}
+        .grasas-color {{ background-color: rgba(155, 89, 182, 0.3); border-color: #9b59b6; }}
+        .fibra-color {{ background-color: rgba(39, 174, 96, 0.3); border-color: #27ae60; }}
+        .condimentos-color {{ background-color: rgba(52, 152, 219, 0.3); border-color: #3498db; }}
+        
         .ingredientes-list {{
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 25px;
             border-radius: 12px;
             margin-bottom: 30px;
-            border: 2px solid #e8f5e8;
+            border: 2px solid #3498db;
         }}
         .ingredientes-list ul {{
             list-style-type: none;
@@ -355,21 +526,15 @@ class RecipeConverterGUI:
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 4px solid #27ae60;
+            border-left: 4px solid #3498db;
             font-size: 1.1em;
             transition: transform 0.2s ease;
         }}
         .ingredientes-list li:hover {{
             transform: translateX(5px);
         }}
-        /* Ingredient name highlighting */
-        .ingredient-name {{
-            color: #27ae60;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }}
-        /* Quantity highlighting */
-        .quantity {{
+        /* Ingredient category highlighting */
+        .ingredient-proteinas {{
             color: #e74c3c;
             font-weight: bold;
             background-color: rgba(231, 76, 60, 0.1);
@@ -377,8 +542,57 @@ class RecipeConverterGUI:
             border-radius: 4px;
             border: 1px solid rgba(231, 76, 60, 0.3);
         }}
+        .ingredient-carbohidratos {{
+            color: #f39c12;
+            font-weight: bold;
+            background-color: rgba(243, 156, 18, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(243, 156, 18, 0.3);
+        }}
+        .ingredient-grasas {{
+            color: #9b59b6;
+            font-weight: bold;
+            background-color: rgba(155, 89, 182, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(155, 89, 182, 0.3);
+        }}
+        .ingredient-fibra {{
+            color: #27ae60;
+            font-weight: bold;
+            background-color: rgba(39, 174, 96, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }}
+        .ingredient-condimentos {{
+            color: #3498db;
+            font-weight: bold;
+            background-color: rgba(52, 152, 219, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }}
+        .ingredient-default {{
+            color: #34495e;
+            font-weight: bold;
+            background-color: rgba(52, 73, 94, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(52, 73, 94, 0.3);
+        }}
+        /* Quantity highlighting */
+        .quantity {{
+            color: #2c3e50;
+            font-weight: bold;
+            background-color: rgba(44, 62, 80, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(44, 62, 80, 0.3);
+        }}
         .instrucciones-list {{
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 25px;
             border-radius: 12px;
             border: 2px solid #f39c12;
@@ -396,6 +610,10 @@ class RecipeConverterGUI:
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             border-left: 4px solid #f39c12;
             font-size: 1.05em;
+            transition: transform 0.2s ease;
+        }}
+        .instrucciones-list li:hover {{
+            transform: translateX(5px);
         }}
         /* Action verbs highlighting */
         .action-verb {{
@@ -430,6 +648,7 @@ class RecipeConverterGUI:
             .recipe-container {{ padding: 20px; }}
             h1 {{ font-size: 2em; }}
             h2 {{ font-size: 1.5em; }}
+            .legend-items {{ flex-direction: column; }}
         }}
     </style>
 </head>
@@ -437,12 +656,37 @@ class RecipeConverterGUI:
     <div class="recipe-container">
         <h1>{titulo}</h1>
         
+        <div class="category-legend">
+            <h3>🏷️ Categorías de Ingredientes</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color proteinas-color"></div>
+                    <span>Proteínas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color carbohidratos-color"></div>
+                    <span>Carbohidratos</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color grasas-color"></div>
+                    <span>Grasas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color fibra-color"></div>
+                    <span>Fibra y Vegetales</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color condimentos-color"></div>
+                    <span>Condimentos y Especias</span>
+                </div>
+            </div>
+        </div>
+        
         <h2>📋 Ingredientes</h2>
         <div class="ingredientes-list">
             <ul>"""
         
         for ingrediente in ingredientes:
-            # Color highlighting
             highlighted_ingredient = self.highlight_ingredient(ingrediente)
             html_content += f"\n                <li>{highlighted_ingredient}</li>"
         
@@ -455,7 +699,6 @@ class RecipeConverterGUI:
             <ol>"""
         
         for i, instruccion in enumerate(instrucciones, 1):
-            # Color highlighting
             highlighted_instruction = self.highlight_instruction(instruccion)
             html_content += f"\n                <li>{highlighted_instruction}</li>"
         
@@ -464,7 +707,7 @@ class RecipeConverterGUI:
         </div>
         
         <div class="footer">
-            <p>Receta generada automáticamente</p>
+            <p>Receta generada automáticamente con categorización de ingredientes</p>
         </div>
     </div>
 </body>
@@ -480,10 +723,10 @@ class RecipeConverterGUI:
             return False
     
     def highlight_ingredient(self, ingredient_text):
-        """Add color highlighting to ingredient names and quantities"""
+        """Add color highlighting to ingredient names based on categories and quantities"""
         import re
         
-        pattern = r'([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)\s*-\s*(\d+)\s*([a-zA-Z]*)'
+        pattern = r'([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)\s*-\s*(\d+)\s*([a-zA-ZáéíóúÁÉÍÓÚñÑ]*)'
         match = re.match(pattern, ingredient_text)
         
         if match:
@@ -491,7 +734,14 @@ class RecipeConverterGUI:
             quantity = match.group(2)
             unit = match.group(3)
             
-            highlighted = f'<span class="ingredient-name">{ingredient_name}</span> - <span class="quantity">{quantity} {unit}</span>'
+            category = self.get_ingredient_category(ingredient_name)
+            
+            if category:
+                ingredient_class = f"ingredient-{category}"
+            else:
+                ingredient_class = "ingredient-default"
+            
+            highlighted = f'<span class="{ingredient_class}">{ingredient_name}</span> - <span class="quantity">{quantity} {unit}</span>'
             return highlighted
         
         return ingredient_text
@@ -500,16 +750,31 @@ class RecipeConverterGUI:
         """Add color highlighting to action verbs and measurements in instructions"""
         import re
         
-        # Common cooking verbs
         action_verbs = [
             'mezclar', 'batir', 'cocinar', 'hornear', 'freír', 'hervir', 'saltear',
             'picar', 'cortar', 'rallar', 'pelar', 'lavar', 'añadir', 'agregar',
             'verter', 'servir', 'calentar', 'enfriar', 'refrigerar', 'tapar',
             'destapar', 'remover', 'revolver', 'amasar', 'estirar', 'doblar',
-            'precalentar', 'dorar', 'sofreír', 'condimentar', 'sazonar'
+            'precalentar', 'dorar', 'sofreír', 'condimentar', 'sazonar',
+            'incorporar', 'espolvorear', 'marinar', 'macerar', 'infusionar',
+            'emulsionar', 'montar', 'blanquear', 'escaldar', 'glasear',
+            'caramelizar', 'flamear', 'gratinar', 'brasear', 'estofar',
+            'guisar', 'confitar', 'deshidratar', 'fermentar', 'curar',
+            'ahumar', 'sellar', 'rehogar', 'pochear', 'cocinar al vapor',
+            'hornear al baño maría', 'reducir', 'concentrar', 'clarificar',
+            'colar', 'tamizar', 'cribar', 'licuar', 'triturar', 'moler',
+            'pulverizar', 'desmenuzar', 'filetear', 'despellejar', 'deshuesar',
+            'trinchar', 'juliana', 'brunoise', 'chiffonade', 'concassé',
+            'laminar', 'tornear', 'acanalear', 'marcar', 'puntear',
+            'glasear', 'napar', 'decorar', 'emplatar', 'presentar',
+            'aliñar', 'aderezar', 'rectificar', 'ajustar', 'probar',
+            'degustar', 'temperar', 'atemperar', 'enfriar', 'congelar',
+            'descongelar', 'ablandar', 'espesar', 'ligar', 'montar',
+            'batir a punto de nieve', 'cremar', 'pomada', 'sudar',
+            'pochar', 'confitar', 'laquear', 'brascar', 'rustir', 'tostar',
+            'cocer', 'asar',
         ]
         
-        # Time and temperature patterns
         time_temp_patterns = [
             r'\d+\s*minutos?', r'\d+\s*horas?', r'\d+\s*segundos?',
             r'\d+\s*°[CF]', r'\d+\s*grados?'
@@ -517,13 +782,11 @@ class RecipeConverterGUI:
         
         highlighted_text = instruction_text
         
-        # Highlight action cooking verbs
         for verb in action_verbs:
             pattern = r'\b(' + verb + r')\b'
             highlighted_text = re.sub(pattern, r'<span class="action-verb">\1</span>', 
                                     highlighted_text, flags=re.IGNORECASE)
         
-        # Highlight time and temperature
         for pattern in time_temp_patterns:
             highlighted_text = re.sub(pattern, r'<span class="time-temp">\g<0></span>', 
                                     highlighted_text, flags=re.IGNORECASE)
@@ -539,7 +802,6 @@ class RecipeConverterGUI:
                 pass
 
 def main():
-    # Run the application
     try:
         import ply.lex as lex
     except ImportError:
